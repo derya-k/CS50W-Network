@@ -1,0 +1,83 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+{% load static %}
+
+{% if showFollower %}
+<div class="follow-info">
+<span >Followers: {{ follower }} | </span>
+<span >Following: {{ following}} </span>
+</div>
+{% endif %}
+
+{% for post in page_obj%}
+<div class="main-user-div">
+
+    <div class="user-div"><a href="{% url 'profile' post.author.id %}">{{ post.author}}</a></div>
+    <div class="content-div" id="post-{{post.id}}">{{ post.body}} </div>
+    <div class="like-div" >Likes: <span id="like-count-{{post.id}}">{{post.likes.all.count}}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" 
+        width="16" 
+        height="16" 
+        fill="
+        {% if user in post.likes.all %}
+        red
+        {% else %}
+        black
+        {% endif %}"
+        class="bi bi-heart-fill" 
+        viewBox="0 0 16 16"
+        data-id="{{ post.id }}"
+        data-user="{{ post.author.id }}">
+        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+        </svg> 
+        <span class="date-span">{{post.date}}</span>
+    </div>
+    {% if request.user == post.author %}
+    <div>
+        <button class="submit-post edit-btn" data-id="{{ post.id }}">Edit</button>
+    </div>
+    {% else %}
+    <div>
+        <button class="follow-btn" data-id="{{ post.id }}" data-user="{{ post.author.id }}" >
+            {% if post.author in request.user.following.all %}
+            Unfollow
+            {% else %}
+            Follow
+            {% endif %}
+        </button>
+    </div>
+    {% endif %}
+    
+</div>
+{% endfor %}
+<div id="profile-page"></div>
+
+<div id="all-posts"></div>
+
+<footer aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+      {% endif %}
+      {% for page in page_obj.paginator.page_range %}
+      {% if page == page_obj.number %}
+      <li class="page-item active" aria-current="page">
+        <a class="page-link" href="?page={{ page }}">{{ page }} <span class="sr-only">(current)</span></a>
+    </li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>
+    {% endif %}
+      {% endfor%}
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+</footer>
+    
+    
+{% endblock %}
